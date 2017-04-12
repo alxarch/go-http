@@ -23,6 +23,7 @@ func (rec *Recovery) Wrap(next http.Handler) http.Handler {
 					// Handle http coded errors gracefully
 					http.Error(w, hp.Error(), hp.Code())
 				} else {
+					// Delegate error hanlding to negroni Recovery
 					panic(e)
 				}
 			}
