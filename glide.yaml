@@ -1,0 +1,4 @@
+package: github.com/alxarch/go-http
+import:
+- package: github.com/urfave/negroni
+  version: ~0.2.0
