@@ -43,6 +43,9 @@ func Timeout(d time.Duration, timeoutHandler http.Handler) Middleware {
 				Body:      getBuffer(),
 				Code:      200,
 			}
+			defer func() {
+				putBuffer(rec.Body)
+			}()
 			go func() {
 				defer close(done)
 				next.ServeHTTP(rec, r.WithContext(ctx))
@@ -52,20 +55,17 @@ func Timeout(d time.Duration, timeoutHandler http.Handler) Middleware {
 				switch err := ctx.Err(); err {
 				case context.DeadlineExceeded:
 					timeoutHandler.ServeHTTP(w, r)
-				case context.Canceled:
-					http.Error(w, err.Error(), http.StatusInternalServerError)
 				default:
+					// Should never be the case
 					panic(err)
-					// pass
 				}
-				return
 			case <-done:
+				dest := w.Header()
 				for k, v := range rec.HeaderMap {
-					w.Header()[k] = v
+					dest[k] = v
 				}
 				w.WriteHeader(rec.Code)
 				rec.Body.WriteTo(w)
-				return
 			}
 		})
 	})
