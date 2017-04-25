@@ -36,6 +36,10 @@ func Compose(mws ...Middleware) http.Handler {
 	return Middlewares(mws).Wrap(NopHandler)
 }
 
+func Wrap(h http.Handler, mws ...Middleware) http.Handler {
+	return Middlewares(mws).Wrap(h)
+}
+
 func RequireMethods(methods ...string) Middleware {
 	allowed := make(map[string]bool)
 	for _, m := range methods {
