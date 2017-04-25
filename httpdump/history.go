@@ -1,13 +1,30 @@
-package middleware
+package httpdump
 
 import (
 	"bytes"
 	"container/ring"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"net/http/httputil"
 	"sync"
 )
+
+const defaultBufferSize = 8192
+
+var pool = sync.Pool{
+	New: func() interface{} {
+		return bytes.NewBuffer(make([]byte, defaultBufferSize))
+	},
+}
+
+func getBuffer() *bytes.Buffer {
+	return pool.Get().(*bytes.Buffer)
+}
+func putBuffer(b *bytes.Buffer) {
+	b.Reset()
+	pool.Put(b)
+}
 
 type History struct {
 	ring *ring.Ring
@@ -15,11 +32,11 @@ type History struct {
 }
 
 type dump struct {
-	Request  []byte
-	Response []byte
+	Request  Request
+	Response Response
 }
 
-func (r *History) Do(do func(req, res []byte)) {
+func (r *History) Do(do func(req Request, res Response)) {
 	if nil == r.ring {
 		return
 	}
@@ -83,4 +100,14 @@ func (h *History) Wrap(next http.Handler) http.Handler {
 		w.WriteHeader(rec.Code)
 		rec.Body.WriteTo(w)
 	})
+}
+
+func (h *History) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(`{"history": [`))
+	enc := json.NewEncoder(w)
+	h.Do(func(req Request, res Response) {
+		enc.Encode(dump{req, res})
+	})
+	w.Write([]byte(`]}`))
 }

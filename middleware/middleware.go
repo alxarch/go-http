@@ -32,8 +32,8 @@ func (ms Middlewares) Wrap(next http.Handler) http.Handler {
 
 var NopHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
 
-func Compose(mws ...Middleware) Middleware {
-	return Middlewares(mws)
+func Compose(mws ...Middleware) http.Handler {
+	return Middlewares(mws).Wrap(NopHandler)
 }
 
 func RequireMethods(methods ...string) Middleware {
