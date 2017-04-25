@@ -104,10 +104,10 @@ func (h *History) Wrap(next http.Handler) http.Handler {
 
 func (h *History) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(`{"history": [`))
-	enc := json.NewEncoder(w)
+	history := make([]*dump, 0, h.ring.Len())
 	h.Do(func(req Request, res Response) {
-		enc.Encode(dump{req, res})
+		history = append(history, &dump{req, res})
 	})
-	w.Write([]byte(`]}`))
+	enc := json.NewEncoder(w)
+	enc.Encode(history)
 }
