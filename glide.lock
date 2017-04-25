@@ -1,6 +1,0 @@
-hash: 9724866d2f5ea813ff58c7ec0cf361889744104ebdec29d651c4513b9c6ae521
-updated: 2017-04-12T13:58:31.871241567+03:00
-imports:
-- name: github.com/urfave/negroni
-  version: fde5e16d32adc7ad637e9cd9ad21d4ebc6192535
-testImports: []
