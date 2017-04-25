@@ -17,7 +17,7 @@ type response struct {
 	Body          json.RawMessage
 }
 
-var responseLineRX = regexp.MustCompile("^HTTP/1\\.1 (\\d+) (.*)")
+var responseLineRX = regexp.MustCompile("^HTTP/\\d+\\.\\d+ (\\d+) (.*)$")
 
 func (r Response) MarshalJSON() ([]byte, error) {
 	rline, headers, body, err := Parse(r)

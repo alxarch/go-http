@@ -16,7 +16,7 @@ type request struct {
 	Body    json.RawMessage
 }
 
-var requestLineRX = regexp.MustCompile("^([A-Z]+) (/.*) HTTP/1\\.1$")
+var requestLineRX = regexp.MustCompile("^([A-Z]+) (/.*) HTTP/\\d+\\.\\d+$")
 
 func (r Request) MarshalJSON() ([]byte, error) {
 	rline, headers, body, err := Parse(r)
