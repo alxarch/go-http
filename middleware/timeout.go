@@ -13,7 +13,7 @@ const DefaultBufferSize = 8192
 
 var pool = sync.Pool{
 	New: func() interface{} {
-		return bytes.NewBuffer(make([]byte, DefaultBufferSize))
+		return bytes.NewBuffer(make([]byte, 0, DefaultBufferSize))
 	},
 }
 
