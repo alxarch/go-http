@@ -5,14 +5,14 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/alxarch/go-http/assert"
+	"github.com/alxarch/go-http/httperror"
 	"github.com/alxarch/go-http/middleware"
 )
 
 func Test_RecoveryHTTPError(t *testing.T) {
 	rec := middleware.NewRecovery()
 	h := rec.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Panic(http.StatusExpectationFailed, "Foo bar.")
+		panic(httperror.New(http.StatusExpectationFailed))
 	}))
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
@@ -25,6 +25,7 @@ func Test_RecoveryHTTPError(t *testing.T) {
 func Test_Recovery(t *testing.T) {
 	rec := middleware.NewRecovery()
 	rec.PrintStack = true
+	rec.Logger = nil
 	h := rec.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		panic("Foo bar.")
 	}))

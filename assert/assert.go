@@ -3,43 +3,24 @@ package assert
 import (
 	"mime"
 	"net/http"
+
+	"github.com/alxarch/go-http/httperror"
 )
 
-type Error struct {
-	StatusCode int
-	Message    string
-}
-
-func (p Error) Error() string {
-	if "" == p.Message {
-		return http.StatusText(p.StatusCode)
-	}
-	return p.Message
-}
-
-func (p Error) Code() int {
-	return p.StatusCode
-}
-
-func OK(ok bool, code int, message string) {
+func OK(ok bool, args ...interface{}) {
 	if !ok {
-		panic(Error{code, message})
+		panic(httperror.New(args...))
 	}
 }
 
 func NoError(err error, code int) {
 	if err != nil {
-		panic(Error{code, err.Error()})
+		panic(httperror.New(code, err))
 	}
 }
-
-func Panic(code int, message string) {
-	panic(Error{code, message})
-}
-
-func Must(err error) {
-	if err != nil {
-		panic(err)
+func NotNil(x interface{}, args ...interface{}) {
+	if x == nil {
+		panic(httperror.New(args...))
 	}
 }
 
@@ -49,16 +30,17 @@ func Method(m string, allow ...string) string {
 			return m
 		}
 	}
-	panic(Error{http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed)})
+	panic(httperror.New(http.StatusMethodNotAllowed))
 }
 
-func ContentType(v string, allow ...string) (string, map[string]string) {
-	mt, params, err := mime.ParseMediaType(v)
+func ContentType(v string, allow ...string) (mediatype string, params map[string]string) {
+	var err error
+	mediatype, params, err = mime.ParseMediaType(v)
 	NoError(err, http.StatusBadRequest)
 	for _, a := range allow {
-		if mt == a {
-			return mt, params
+		if mediatype == a {
+			return
 		}
 	}
-	panic(Error{http.StatusUnsupportedMediaType, http.StatusText(http.StatusUnsupportedMediaType)})
+	panic(httperror.New(http.StatusUnsupportedMediaType))
 }
